@@ -24,7 +24,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 // analyze responds immediately and begins the code analysis
 // for the specified repo
 func analyze(w http.ResponseWriter, r *http.Request) {
-	log.Print("received analyis request")
+	log.Print("received analyis request from " + r.RemoteAddr)
 
 	// parse the request body and convert to JSON
 	if r.Body == nil {
@@ -32,14 +32,14 @@ func analyze(w http.ResponseWriter, r *http.Request) {
 		sendResponse(w, `{"error": "received empty request body"}`, http.StatusBadRequest)
 		return
 	}
-	bDat, err := ioutil.ReadAll(r.Body)
+	bytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Print("couldn't read byte data from request")
 		sendResponse(w, `{"error": "failed to parse request data; try resending the message"}`, http.StatusInternalServerError)
 		return
 	}
 	r.Body.Close()
-	jsDat, err := simplejson.NewJson(bDat)
+	js, err := simplejson.NewJson(bytes)
 	if err != nil {
 		log.Print("couldn't marshal request byte data to JSON")
 		sendResponse(w, `{"error": "failed to convert request data to JSON; try resending the message"}`, http.StatusInternalServerError)
@@ -47,7 +47,7 @@ func analyze(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check the event type; we only care about newly opened PRs (to avoid double commenting)
-	if jsDat.Get("action").MustString() != "opened" {
+	if js.Get("action").MustString() != "opened" {
 		log.Print("received a message for an event that was not 'opened'; skipping")
 		sendResponse(w, `{"message": "event received was not for PR open; skipping this event"}`, http.StatusOK)
 		return
@@ -61,6 +61,6 @@ func analyze(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// begin analysis of repo code
-	sendResponse(w, `{"message": "received request to analyze code; beginning analysis"}`, http.StatusOK)
-	analyzeCode()
+	sendResponse(w, `{"message": "received request to analyze code; beginning analysis - findings will be posted to a comment on the PR"}`, http.StatusOK)
+	analyzeCode(js)
 }

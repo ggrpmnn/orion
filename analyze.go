@@ -2,10 +2,12 @@ package main
 
 import (
 	"log"
+
+	"github.com/bitly/go-simplejson"
 	//github.com/GoASTScanner/gas
 )
 
-func analyzeCode() {
+func analyzeCode(json *simplejson.Json) {
 	// 1. get repo data from Github
 	// 2. determine what code the repo has (can be mutliple types)
 	// 3. for each language, run analysis tool(s) and process output
