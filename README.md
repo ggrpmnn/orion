@@ -2,6 +2,7 @@
 A tool for running static code analysis on Github projects.
 
 ### Status: SUPER-ALPHA
+This project is in very early development. The dev makes no guarantees or assurances regarding its functionality or state. Please check back periodically to see the progress Orion will make!
 
 ### Languages Currently Supported:
 None!

@@ -13,4 +13,6 @@ func analyzeCode(json *simplejson.Json) {
 	// 3. for each language, run analysis tool(s) and process output
 	// 4. form output(s) into a comment and post to the PR
 	log.Print("beginning code analysis")
+
+	log.Print("finishing code analysis")
 }
