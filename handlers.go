@@ -64,3 +64,11 @@ func analyze(w http.ResponseWriter, r *http.Request) {
 	sendResponse(w, `{"message": "received request to analyze code; beginning analysis - findings will be posted to a comment on the PR"}`, http.StatusOK)
 	analyzeCode(js)
 }
+
+// formResponse creates and writes the HTTP response message
+func sendResponse(w http.ResponseWriter, m string, c int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(c)
+	w.Write([]byte(m + "\n"))
+	return
+}
