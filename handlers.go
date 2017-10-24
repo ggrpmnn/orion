@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bitly/go-simplejson"
+	sj "github.com/bitly/go-simplejson"
 )
 
 // index handles the requests to the main page
@@ -39,7 +39,7 @@ func analyze(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
-	js, err := simplejson.NewJson(bytes)
+	js, err := sj.NewJson(bytes)
 	if err != nil {
 		log.Printf("couldn't marshal request byte data to JSON")
 		sendResponse(w, `{"error": "failed to convert request data to JSON; try resending the message"}`, http.StatusInternalServerError)
