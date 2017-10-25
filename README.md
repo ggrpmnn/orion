@@ -8,12 +8,16 @@ This project is in very early development. The dev makes no guarantees or assura
 None!
 
 ### TODO List:
-Github related
+GitHub
 - [ ] Fully integrate with Github PR webhooks
-- [ ] Figure out permissions scheme for commenting
+- [ ] Figure out permissions scheme for reporting via GitHub comments
 - [ ] Find out if a service account is required
 
 Analysis
-- [ ] Define form & methodology for reporting analysis results
-- [ ] Determine list of languages to implement (based on availability of packages)
+- [ ] Define form & methodology/workflow for reporting analysis results
+- [ ] Determine list of languages to implement (based on availability of packages/analysis tools)
 - [ ] Determine what types of analysis are desirable
+
+Database
+- [ ] Establish database design for storing results (to avoid duplicate reports)
+- [ ] Handle reporting when a security defect has been re-introduced to the codebase
