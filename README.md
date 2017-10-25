@@ -7,10 +7,10 @@ This project is in very early development. The dev makes no guarantees or assura
 ### Dependencies
 - git
 
-### Languages Currently Supported:
+### Languages Currently Supported
 None!
 
-### TODO List:
+### TODO List
 GitHub
 - [ ] Fully integrate with Github PR webhooks
 - [ ] Figure out permissions scheme for reporting via GitHub comments
