@@ -41,7 +41,7 @@ func analyze(w http.ResponseWriter, r *http.Request) {
 	r.Body.Close()
 	js, err := sj.NewJson(bytes)
 	if err != nil {
-		log.Printf("couldn't marshal request byte data to JSON")
+		log.Printf("couldn't marshal request byte data to JSON object")
 		sendResponse(w, `{"error": "failed to convert request data to JSON; try resending the message"}`, http.StatusInternalServerError)
 		return
 	}
