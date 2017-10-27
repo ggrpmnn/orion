@@ -7,14 +7,14 @@ This project is in very early development. The dev makes no guarantees or assura
 ### App Dependencies
 This tool uses and expects several other tools to be installed in order to function properly. If any of the dependencies are not installed, Orion will throw an error and exit when starting up.
 - git
-- gas ([Golang code analysis tool](https://github.com/GoASTScanner/gas))
+- gas ([Go code analysis tool](https://github.com/GoASTScanner/gas))
 
 ### Languages Currently Supported
 - Go (Golang) - in development
 
 ### TODO List
 GitHub
-- [ ] Fully integrate with Github PR webhooks
+- [x] Fully integrate with Github PR webhooks
 - [ ] Figure out permissions scheme for reporting via GitHub comments
 - [ ] Find out if a service account is required
 
