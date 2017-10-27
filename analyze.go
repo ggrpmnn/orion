@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
+	"strings"
 
 	sj "github.com/bitly/go-simplejson"
 	//"github.com/GoASTScanner/gas"
@@ -19,6 +22,15 @@ type Finding struct {
 	File string
 	Line string
 	Text string
+}
+
+// ensure tools are installed before running
+func init() {
+	// GoAST (gas)
+	err := exec.Command("which", "gas").Run()
+	if err != nil {
+		log.Fatal("error: gas not installed")
+	}
 }
 
 // analyzeCode is the function that is called when the API receives a webhook message to the /analyze
@@ -49,7 +61,7 @@ func analyzeCode(json *sj.Json) {
 	}
 	messageHash.Write(jsBytes)
 	workDir := fmt.Sprintf("./%x", messageHash.Sum(nil))
-	os.Mkdir(workDir, 0755)
+	os.Mkdir(workDir, 0700)
 	os.Chdir(workDir)
 	err = exec.Command("git", "clone", gitURL).Run()
 	if err != nil {
@@ -63,17 +75,28 @@ func analyzeCode(json *sj.Json) {
 		log.Printf("%s - failed to retrieve repository code composition: %s", repoName, err)
 		return
 	}
+	var analysisFindings [][]Finding
 	for language := range languages {
 		switch language {
 		case "Go":
-			go runGoAnalysis(json)
+			log.Printf("%s - running Go(lang) code analysis", repoName)
+			findings, err := runGoAnalysis()
+			if err != nil {
+				log.Printf("%s - error while running Go gas tool: %s", repoName, err)
+			}
+			analysisFindings = append(analysisFindings, findings)
 		default:
-			log.Printf("%s - in language loop: landed in default case with value %s", repoName, language)
+			log.Printf("%s - in language loop: in language default with value %s", repoName, language)
 		}
 	}
 
-	// process Finding outputs, compose comment, send to GitHub URL
-	// database recording?
+	if analysisFindings != nil {
+		for _, af := range analysisFindings {
+			for _, f := range af {
+				fmt.Printf("%v\n", f)
+			}
+		}
+	}
 
 	// cleanup working directory
 	os.Chdir("../")
@@ -103,9 +126,29 @@ func getLanguageComposition(endpoint string) (map[string]int, error) {
 }
 
 // runGoAnalysis utilizes the GoAST package to analyze Go(lang) code
-func runGoAnalysis(json *sj.Json) []Finding {
-	repoName := json.Get("repository").Get("name").MustString()
-	log.Printf("%s - running Go(lang) code analysis", repoName)
+func runGoAnalysis() ([]Finding, error) {
+	cmd := exec.Command("gas", "-skip=tests*", "-fmt=json", "./...")
+	resBytes, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	resStr := string(resBytes)
 
-	return nil
+	// parse results
+	findings := make([]Finding, 1)
+	// output line format: [/path/to/file:123] - Errors unhandled. (Confidence: HIGH, Severity: LOW)
+	rx := regexp.MustCompile(`\[([\/\w\.]+):(\d+)\] - (.*) \(.*\)`)
+	scan := bufio.NewScanner(strings.NewReader(resStr))
+	for scan.Scan() {
+		if scan.Text() == "\n" {
+			continue
+		}
+		matches := rx.FindStringSubmatch(scan.Text())
+		findings = append(findings, Finding{File: matches[1], Line: matches[2], Text: matches[3]})
+	}
+	if err := scan.Err(); err != nil {
+		return nil, err
+	}
+
+	return findings, nil
 }
