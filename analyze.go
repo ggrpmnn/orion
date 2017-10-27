@@ -80,7 +80,7 @@ func analyzeCode(json *sj.Json) {
 		log.Printf("%s - failed to retrieve repository code composition: %s", repoName, err)
 		return
 	}
-	var analysisFindings [][]Finding
+	analysisFindings := make(map[string][]Finding)
 	for language := range languages {
 		switch language {
 		case "Go":
@@ -89,14 +89,15 @@ func analyzeCode(json *sj.Json) {
 			if err != nil {
 				log.Printf("%s - error while running Go gas tool: %s", repoName, err)
 			}
-			analysisFindings = append(analysisFindings, findings)
+			analysisFindings["Go"] = findings
 		default:
 			log.Printf("%s - in language loop: in language default with value %s", repoName, language)
 		}
 	}
 
 	if analysisFindings != nil {
-		for _, af := range analysisFindings {
+		for lang, af := range analysisFindings {
+			fmt.Printf("%s:\n", lang)
 			for _, f := range af {
 				fmt.Printf("%v\n", f)
 			}
