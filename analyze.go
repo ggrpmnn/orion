@@ -102,6 +102,7 @@ func getLanguageComposition(endpoint string) (map[string]int, error) {
 	return languages, nil
 }
 
+// runGoAnalysis utilizes the GoAST package to analyze Go(lang) code
 func runGoAnalysis(json *sj.Json) []Finding {
 	repoName := json.Get("repository").Get("name").MustString()
 	log.Printf("%s - running Go(lang) code analysis", repoName)
