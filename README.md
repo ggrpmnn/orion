@@ -4,11 +4,13 @@ A tool for running static code analysis on Github projects.
 ### Status: SUPER-ALPHA
 This project is in very early development. The dev makes no guarantees or assurances regarding its functionality or state. Please check back periodically to see the progress Orion will make!
 
-### Dependencies
+### App Dependencies
+This tool uses and expects several other tools to be installed in order to function properly. If any of the dependencies are not installed, Orion will throw an error and exit when starting up.
 - git
+- gas ([Golang code analysis tool](https://github.com/GoASTScanner/gas))
 
 ### Languages Currently Supported
-None!
+- Go (Golang) - in development
 
 ### TODO List
 GitHub
