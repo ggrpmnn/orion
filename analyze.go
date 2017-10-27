@@ -24,10 +24,15 @@ type Finding struct {
 	Text string
 }
 
-// ensure tools are installed before running
+// ensure tools are installed before running any analysis ops
 func init() {
+	// git
+	err := exec.Command("which", "git").Run()
+	if err != nil {
+		log.Fatal("error: git not installed")
+	}
 	// GoAST (gas)
-	err := exec.Command("which", "gas").Run()
+	err = exec.Command("which", "gas").Run()
 	if err != nil {
 		log.Fatal("error: gas not installed")
 	}
