@@ -21,7 +21,7 @@ func init() {
 	// GoAST (gas)
 	err = exec.Command("which", "gas").Run()
 	if err != nil {
-		log.Fatal("error: gas not installed")
+		log.Fatal("error: gas (Go(lang) scanner) not installed")
 	}
 }
 
@@ -36,7 +36,7 @@ func analyzeGo() ([]Finding, error) {
 
 	// parse results
 	findings := make([]Finding, 1)
-	// output line format: [/path/to/file:123] - Errors unhandled. (Confidence: HIGH, Severity: LOW)
+	// output line format/example: [/path/to/file:123] - Errors unhandled. (Confidence: HIGH, Severity: LOW)
 	rx := regexp.MustCompile(`\[([\/\w\.]+):(\d+)\] - (.*) \(.*\)`)
 	scan := bufio.NewScanner(strings.NewReader(resStr))
 	for scan.Scan() {
@@ -53,6 +53,12 @@ func analyzeGo() ([]Finding, error) {
 	return findings, nil
 }
 
+// analyzeRuby performs code analysis by running ???
 func analyzeRuby() ([]Finding, error) {
+	return nil, nil
+}
+
+// analyzeJava checks Java code by using
+func analyzeJava() ([]Finding, error) {
 	return nil, nil
 }
