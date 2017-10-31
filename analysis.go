@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	//"github.com/GoASTScanner/gas"
 )
 
 // Finding represents a result from one of the analysis tools
@@ -52,6 +53,6 @@ func analyzeGo() ([]Finding, error) {
 	return findings, nil
 }
 
-func analyseRuby() ([]Finding, error) {
+func analyzeRuby() ([]Finding, error) {
 	return nil, nil
 }

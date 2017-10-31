@@ -11,7 +11,6 @@ import (
 	"os/exec"
 
 	sj "github.com/bitly/go-simplejson"
-	//"github.com/GoASTScanner/gas"
 )
 
 func init() {
