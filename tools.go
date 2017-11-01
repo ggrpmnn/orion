@@ -2,8 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os/exec"
 	"regexp"
@@ -20,8 +18,8 @@ type Finding struct {
 	Text string
 }
 
-// AnalysisTool represents a single tool for performing code analysis
-type AnalysisTool struct {
+// Tool represents a single tool for performing code analysis
+type Tool struct {
 	// the language that the tool analyzes
 	Language string
 	// the name of the tool
@@ -34,31 +32,14 @@ type AnalysisTool struct {
 	Output []Finding
 }
 
-var tools map[string]AnalysisTool
-
 func init() {
 	var err error
-	tools = make(map[string]AnalysisTool)
 
-	configBytes, err := ioutil.ReadFile("./config.json")
+	err = exec.Command("/usr/bin/which", "gas").Run()
 	if err != nil {
-		log.Fatal("failed to load ./config.json file")
+		log.Fatalf("gas (Go(lang) source tool) not installed; exiting")
 	}
-	toolsList := make([]AnalysisTool, 0)
-	err = json.Unmarshal(configBytes, &toolsList)
-	if err != nil {
-		log.Fatal("failed to marshal config file; check the file and try again")
-	}
-	// convert to map for faster lookup later
-	for _, tool := range toolsList {
-		tools[tool.Language] = tool
-	}
-	for _, tool := range tools {
-		err = exec.Command(tool.Path, tool.Args...).Run()
-		if err != nil {
-			log.Fatalf("specified tool '%s' is not installed on this system; install the tool or remove it from the configuration", tool.Name)
-		}
-	}
+
 }
 
 // analyzeGo utilizes the GoAST package to analyze Go(lang) code
