@@ -18,20 +18,6 @@ type Finding struct {
 	Text string
 }
 
-// Tool represents a single tool for performing code analysis
-type Tool struct {
-	// the language that the tool analyzes
-	Language string
-	// the name of the tool
-	Name string
-	// the path (absolute) to the tool on this system
-	Path string
-	// the arguments to be passed to the tool on the command line
-	Args []string
-	// the output of the tool
-	Output []Finding
-}
-
 var gasCmdPath string
 
 func init() {
@@ -56,7 +42,7 @@ func analyzeGo() ([]Finding, error) {
 	// parse results
 	findings := make([]Finding, 1)
 	// output line format/example: [/path/to/file:123] - Errors unhandled. (Confidence: HIGH, Severity: LOW)
-	rx := regexp.MustCompile(`\[([\/\w\.]+):(\d+)\] - (.*) \(.*\)`)
+	rx := regexp.MustCompile(`\[([\/\w\.]+):(\d+)\] - (.*)`)
 	scan := bufio.NewScanner(strings.NewReader(resStr))
 	for scan.Scan() {
 		if scan.Text() == "\n" {
