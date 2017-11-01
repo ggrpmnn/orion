@@ -32,19 +32,21 @@ type Tool struct {
 	Output []Finding
 }
 
+var gasCmdPath string
+
 func init() {
 	var err error
 
-	err = exec.Command("/usr/bin/which", "gas").Run()
+	outBytes, err := exec.Command("/usr/bin/which", "gas").Output()
 	if err != nil {
 		log.Fatalf("gas (Go(lang) source tool) not installed; exiting")
 	}
-
+	gasCmdPath = string(outBytes)
 }
 
 // analyzeGo utilizes the GoAST package to analyze Go(lang) code
 func analyzeGo() ([]Finding, error) {
-	cmd := exec.Command("gas", "-skip=tests*", "-fmt=json", "./...")
+	cmd := exec.Command(gasCmdPath, "-skip=tests*", "-fmt=json", "./...")
 	resBytes, err := cmd.Output()
 	if err != nil {
 		return nil, err

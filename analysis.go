@@ -13,13 +13,16 @@ import (
 	sj "github.com/bitly/go-simplejson"
 )
 
+var gitCmdPath string
+
 func init() {
 	var err error
-	// git
-	err = exec.Command("which", "git").Run()
+
+	outBytes, err := exec.Command("/usr/bin/which", "git").Output()
 	if err != nil {
-		log.Fatal("error: git not installed")
+		log.Fatal("error: git not installed or not added to PATH")
 	}
+	gitCmdPath = string(outBytes)
 }
 
 // analyzeCode is is called when the API receives a webhook message to the /analyze
@@ -52,7 +55,7 @@ func analyzeCode(json *sj.Json) {
 	os.Mkdir(workDir, 0700)
 	os.Chdir(workDir)
 	defer cleanup(workDir)
-	err = exec.Command("git", "clone", gitURL).Run()
+	err = exec.Command(gitCmdPath, "clone", gitURL).Run()
 	if err != nil {
 		log.Printf("%s - failed to clone repository from target URL '%s': %s", repoName, gitURL, err)
 		return
