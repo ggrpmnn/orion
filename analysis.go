@@ -62,7 +62,7 @@ func analyzeCode(json *sj.Json) {
 		switch language {
 		case "Go":
 			log.Printf("%s - running Go(lang) code analysis", repoName)
-			findings, err := analyzeGo()
+			findings, err := analyzeGo(repoName)
 			if err != nil {
 				log.Printf("%s - error while running Go gas tool: %s", repoName, err)
 			}

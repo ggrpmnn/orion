@@ -28,7 +28,7 @@ func init() {
 }
 
 // analyzeGo utilizes the GoAST package to analyze Go(lang) code
-func analyzeGo() ([]Finding, error) {
+func analyzeGo(repoName string) ([]Finding, error) {
 	cmd := exec.Command("gas", "-skip=tests*", "./...")
 	resBytes, _ := cmd.Output()
 	resStr := string(resBytes)
@@ -43,11 +43,26 @@ func analyzeGo() ([]Finding, error) {
 		if len(matches) <= 0 {
 			continue
 		}
-		findings = append(findings, Finding{File: matches[1], Line: matches[2], Text: matches[3]})
+		filepath := matches[1]
+		pathSplit := strings.Split(filepath, "/")
+		ok, idx := pathContains(pathSplit, repoName)
+		if ok {
+			filepath = strings.Join(pathSplit[idx:], "/")
+		}
+		findings = append(findings, Finding{File: filepath, Line: matches[2], Text: matches[3]})
 	}
 	if err := scan.Err(); err != nil {
 		return nil, err
 	}
 
 	return findings, nil
+}
+
+func pathContains(s []string, lookup string) (bool, int) {
+	for i, v := range s {
+		if v == lookup {
+			return true, i
+		}
+	}
+	return false, -1
 }
