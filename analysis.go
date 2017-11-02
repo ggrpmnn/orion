@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -30,8 +31,7 @@ func analyzeCode(json *sj.Json) {
 
 	gitURL := json.Get("pull_request").Get("head").Get("repo").Get("clone_url").MustString()
 	if gitURL == "" {
-		jsonBytes, _ := json.Encode()
-		log.Printf("%s - failed to retrieve git URL from data: %s", repoName, string(jsonBytes))
+		log.Printf("%s - failed to retrieve git URL from JSON message", repoName)
 		return
 	}
 	// create SHA hash of message and use it as the name of the work directory
@@ -61,7 +61,7 @@ func analyzeCode(json *sj.Json) {
 	for language := range languages {
 		switch language {
 		case "Go":
-			log.Printf("%s - running Go(lang) code analysis", repoName)
+			log.Printf("%s - running Go(lang) analysis", repoName)
 			findings, err := analyzeGo(repoName)
 			if err != nil {
 				log.Printf("%s - error while running Go gas tool: %s", repoName, err)
@@ -72,8 +72,21 @@ func analyzeCode(json *sj.Json) {
 		}
 	}
 
-	// TODO - remove this when comment writing functionality is implemented
-	fmt.Println(composeCommentText(analysisFindings))
+	commentsURL := json.Get("pull_request").Get("comments_url").MustString()
+	if commentsURL == "" {
+		log.Printf("%s - failed to retrieve comments URL from JSON message", repoName)
+		return
+	}
+	body := []byte(`{"body": "` + composeCommentText(analysisFindings) + `", "event": "COMMENT"}`)
+	res, err := http.Post(commentsURL, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		log.Printf("%s - received error when  POSTing comment: %s", repoName, err)
+		return
+	}
+	if res.StatusCode > 299 {
+		log.Printf("%s - received error status (%d) when POSTing comment", repoName, res.StatusCode)
+		return
+	}
 
 	log.Printf("%s - finishing overall code analysis", repoName)
 }
@@ -105,6 +118,7 @@ func getRepoLanguages(endpoint string) (map[string]int, error) {
 	return languages, nil
 }
 
+// composeCommentText creates the content of a comment message
 func composeCommentText(af map[string][]Finding) string {
 	body := "Hi, I'm Orion, a code-analysis application. When you registered your pull request, your code was scanned and the following issues were found.\n\n"
 	for language, findings := range af {
@@ -114,7 +128,6 @@ func composeCommentText(af map[string][]Finding) string {
 		}
 		body += "\n\n"
 	}
-
 	body += "Please fix these issues before merging this PR, if possible. Thanks!"
 
 	return body

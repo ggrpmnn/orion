@@ -47,7 +47,7 @@ func analyzeGo(repoName string) ([]Finding, error) {
 		pathSplit := strings.Split(filepath, "/")
 		ok, idx := pathContains(pathSplit, repoName)
 		if ok {
-			filepath = strings.Join(pathSplit[idx:], "/")
+			filepath = strings.Join(pathSplit[idx+1:], "/")
 		}
 		findings = append(findings, Finding{File: filepath, Line: matches[2], Text: matches[3]})
 	}
