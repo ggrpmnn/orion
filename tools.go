@@ -18,21 +18,18 @@ type Finding struct {
 	Text string
 }
 
-var gasCmdPath string
-
 func init() {
 	var err error
 
-	outBytes, err := exec.Command("/usr/bin/which", "gas").Output()
+	err = exec.Command("/usr/bin/which", "gas").Run()
 	if err != nil {
 		log.Fatalf("gas (Go(lang) source tool) not installed; exiting")
 	}
-	gasCmdPath = string(outBytes)
 }
 
 // analyzeGo utilizes the GoAST package to analyze Go(lang) code
 func analyzeGo() ([]Finding, error) {
-	cmd := exec.Command(gasCmdPath, "-skip=tests*", "-fmt=json", "./...")
+	cmd := exec.Command("gas", "-skip=tests*", "-fmt=json", "./...")
 	resBytes, err := cmd.Output()
 	if err != nil {
 		return nil, err

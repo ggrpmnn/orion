@@ -13,8 +13,6 @@ import (
 	sj "github.com/bitly/go-simplejson"
 )
 
-var gitCmdPath string
-
 func init() {
 	var err error
 
