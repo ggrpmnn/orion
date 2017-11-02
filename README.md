@@ -16,10 +16,10 @@ This tool uses and expects several other tools to be installed in order to funct
 GitHub
 - [x] Fully integrate with Github PR webhooks
 - [ ] Figure out permissions scheme for reporting via GitHub comments
-- [ ] Find out if a service account is required
+- [x] Find out if a service account is required
 
 Analysis
-- [ ] Define form & methodology/workflow for reporting analysis results
+- [ ] Define better form & methodology/workflow for reporting analysis results
 - [ ] Determine list of languages to implement (based on availability of packages/analysis tools)
 - [ ] Determine what types of analysis are desirable
 
