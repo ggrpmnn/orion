@@ -36,7 +36,7 @@ func analyzeGo(repoName string) ([]Finding, error) {
 	// parse results
 	findings := make([]Finding, 0)
 	// output line format/example: [/path/to/file:123] - Errors unhandled. (Confidence: HIGH, Severity: LOW)
-	rx := regexp.MustCompile(`\[([\S]+):(\d+)\] - (.*) \(.*\)`)
+	rx := regexp.MustCompile(`\[([\S]+):(\d+)\] - (.*)`)
 	scan := bufio.NewScanner(strings.NewReader(resStr))
 	for scan.Scan() {
 		matches := rx.FindStringSubmatch(scan.Text())
