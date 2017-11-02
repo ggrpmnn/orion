@@ -29,23 +29,20 @@ func init() {
 
 // analyzeGo utilizes the GoAST package to analyze Go(lang) code
 func analyzeGo() ([]Finding, error) {
-	cmd := exec.Command("gas", "-skip=tests*", "-fmt=json", "./...")
-	resBytes, err := cmd.Output()
-	if err != nil {
-		return nil, err
-	}
+	cmd := exec.Command("gas", "-skip=tests*", "./...")
+	resBytes, _ := cmd.Output()
 	resStr := string(resBytes)
 
 	// parse results
-	findings := make([]Finding, 1)
+	findings := make([]Finding, 0)
 	// output line format/example: [/path/to/file:123] - Errors unhandled. (Confidence: HIGH, Severity: LOW)
-	rx := regexp.MustCompile(`\[([\/\w\.]+):(\d+)\] - (.*)`)
+	rx := regexp.MustCompile(`\[([\S]+):(\d+)\] - (.*) \(.*\)`)
 	scan := bufio.NewScanner(strings.NewReader(resStr))
 	for scan.Scan() {
-		if scan.Text() == "\n" {
+		matches := rx.FindStringSubmatch(scan.Text())
+		if len(matches) <= 0 {
 			continue
 		}
-		matches := rx.FindStringSubmatch(scan.Text())
 		findings = append(findings, Finding{File: matches[1], Line: matches[2], Text: matches[3]})
 	}
 	if err := scan.Err(); err != nil {

@@ -28,13 +28,7 @@ func analyzeCode(json *sj.Json) {
 	repoName := json.Get("repository").Get("name").MustString()
 	log.Printf("%s - beginning overall code analysis", repoName)
 
-	// htmlURL := json.Get("pull_request").Get("html_url").MustString()
-	// if htmlURL == "" {
-	// 	jsonBytes, _ := json.Encode()
-	// 	log.Printf("%s - failed to retrieve repo URL from data: %s", repoName, string(jsonBytes))
-	// 	return
-	// }
-	gitURL := json.Get("repository").Get("git_url").MustString()
+	gitURL := json.Get("pull_request").Get("head").Get("repo").Get("clone_url").MustString()
 	if gitURL == "" {
 		jsonBytes, _ := json.Encode()
 		log.Printf("%s - failed to retrieve git URL from data: %s", repoName, string(jsonBytes))
@@ -58,7 +52,7 @@ func analyzeCode(json *sj.Json) {
 		return
 	}
 
-	languages, err := getLanguageComposition(json.Get("repository").Get("languages_url").MustString())
+	languages, err := getRepoLanguages(json.Get("repository").Get("languages_url").MustString())
 	if err != nil {
 		log.Printf("%s - failed to retrieve repository code composition: %s", repoName, err)
 		return
@@ -91,9 +85,9 @@ func analyzeCode(json *sj.Json) {
 	log.Printf("%s - finishing overall code analysis", repoName)
 }
 
-// getLanguageComposition queries GitHub for the repository's language composition; see
+// getRepoLanguages queries GitHub for the repository's language composition; see
 // https://developer.github.com/v3/repos/#list-languages for more information on the service
-func getLanguageComposition(endpoint string) (map[string]int, error) {
+func getRepoLanguages(endpoint string) (map[string]int, error) {
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		return nil, err
