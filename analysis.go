@@ -72,17 +72,17 @@ func analyzeCode(json *sj.Json) {
 		}
 	}
 
-	// Print findings - TODO REMOVE
-	if analysisFindings != nil {
-		for lang, af := range analysisFindings {
-			fmt.Printf("%s:\n", lang)
-			for _, f := range af {
-				fmt.Printf("%v\n", f)
-			}
-		}
-	}
+	// TODO - remove this when comment writing functionality is implemented
+	fmt.Println(composeCommentText(analysisFindings))
 
 	log.Printf("%s - finishing overall code analysis", repoName)
+}
+
+// cleanup removes new folders and cloned code when the analysis is done; this function preferably
+// should be 'defer'ed to ensure that it is run even when a panic/unexpected error occurs
+func cleanup(dir string) {
+	os.Chdir("../")
+	os.RemoveAll(dir)
 }
 
 // getRepoLanguages queries GitHub for the repository's language composition; see
@@ -105,9 +105,17 @@ func getRepoLanguages(endpoint string) (map[string]int, error) {
 	return languages, nil
 }
 
-// cleanup removes new folders and cloned code when the analysis is done; this function preferably
-// should be 'defer'ed to ensure that it is run even when a panic/unexpected error occurs
-func cleanup(dir string) {
-	os.Chdir("../")
-	os.RemoveAll(dir)
+func composeCommentText(af map[string][]Finding) string {
+	body := "Hi, I'm Orion, a code-analysis application. When you registered your pull request, your code was scanned and the following issues were found.\n\n"
+	for language, findings := range af {
+		body += fmt.Sprintf("%s:\n", language)
+		for _, finding := range findings {
+			body += fmt.Sprintf("* %s, line %s: %s\n", finding.File, finding.Line, finding.Text)
+		}
+		body += "\n\n"
+	}
+
+	body += "It's a good idea to fix these issues before merging this PR, if possible. Thanks!"
+
+	return body
 }
