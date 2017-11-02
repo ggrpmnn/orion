@@ -110,12 +110,12 @@ func composeCommentText(af map[string][]Finding) string {
 	for language, findings := range af {
 		body += fmt.Sprintf("%s:\n", language)
 		for _, finding := range findings {
-			body += fmt.Sprintf("* %s, line %s: %s\n", finding.File, finding.Line, finding.Text)
+			body += fmt.Sprintf("* `%s`, line %s: %s\n", finding.File, finding.Line, finding.Text)
 		}
 		body += "\n\n"
 	}
 
-	body += "It's a good idea to fix these issues before merging this PR, if possible. Thanks!"
+	body += "Please fix these issues before merging this PR, if possible. Thanks!"
 
 	return body
 }
