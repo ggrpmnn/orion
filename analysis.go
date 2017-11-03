@@ -66,13 +66,17 @@ func analyzeCode(json *sj.Json) {
 			if err != nil {
 				log.Printf("%s - error while running Go gas tool: %s", repoName, err)
 			}
-			analysisFindings["Go"] = findings
+			if len(findings) > 0 {
+				analysisFindings["Go"] = findings
+			}
 		default:
 			log.Printf("%s - in language loop: in language default; found '%s'", repoName, language)
 		}
 	}
-	if len(analysisFindings) <= 0 {
+	if len(analysisFindings) == 0 {
 		log.Printf("%s - no results returned from scan(s); PR seems clean", repoName)
+		log.Printf("%s - finishing overall code analysis", repoName)
+		return
 	} else {
 		commentsURL := json.Get("pull_request").Get("comments_url").MustString()
 		if commentsURL == "" {
