@@ -15,8 +15,8 @@ This tool uses and expects several other tools to be installed in order to funct
 ### TODO List
 GitHub
 - [x] Fully integrate with Github PR webhooks
-- [ ] Figure out permissions scheme for reporting via GitHub comments
-- [x] Find out if a service account is required
+- [x] Figure out permissions scheme for reporting via GitHub comments
+- [x] Find out if a service account is required (Yes!)
 
 Analysis
 - [ ] Define better form & methodology/workflow for reporting analysis results

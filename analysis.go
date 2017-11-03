@@ -81,10 +81,10 @@ func analyzeCode(json *sj.Json) {
 	req, err := http.NewRequest("POST", commentsURL, strings.NewReader(body))
 	if err != nil {
 		log.Printf("%s - failed to create POST request", repoName)
+		return
 	}
-	token := os.Getenv("GH_AUTH_TOKEN")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "token "+token)
+	req.Header.Set("Authorization", "token "+os.Getenv("GH_AUTH_TOKEN"))
 	client := http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
@@ -93,6 +93,10 @@ func analyzeCode(json *sj.Json) {
 	}
 	if res.StatusCode > 299 {
 		log.Printf("%s - received error status (%d) when POSTing comment", repoName, res.StatusCode)
+		if res != nil {
+			bytes, _ := ioutil.ReadAll(res.Body)
+			log.Printf("%s - response error: %s", repoName, bytes)
+		}
 		return
 	}
 
@@ -128,13 +132,13 @@ func getRepoLanguages(endpoint string) (map[string]int, error) {
 
 // composeCommentText creates the content of a comment message
 func composeCommentText(af map[string][]Finding) string {
-	body := "Hi, I'm Orion, a code-analysis application. When you registered your pull request, your code was scanned and the following issues were found.\n\n"
+	body := "Hi, I'm Orion, a code-analysis application. When you registered your pull request, your code was scanned and the following issues were found.\\n\\n"
 	for language, findings := range af {
-		body += fmt.Sprintf("%s:\n", language)
+		body += fmt.Sprintf("%s:\\n", language)
 		for _, finding := range findings {
-			body += fmt.Sprintf("* `%s`, line %s: %s\n", finding.File, finding.Line, finding.Text)
+			body += fmt.Sprintf("* `%s`, line %s: %s\\n", finding.File, finding.Line, finding.Text)
 		}
-		body += "\n\n"
+		body += "\\n\\n"
 	}
 	body += "Please fix these issues before merging this PR, if possible. Thanks!"
 
