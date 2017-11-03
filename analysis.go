@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 
 	sj "github.com/bitly/go-simplejson"
 )
@@ -77,8 +77,16 @@ func analyzeCode(json *sj.Json) {
 		log.Printf("%s - failed to retrieve comments URL from JSON message", repoName)
 		return
 	}
-	body := []byte(`{"body": "` + composeCommentText(analysisFindings) + `", "event": "COMMENT"}`)
-	res, err := http.Post(commentsURL, "application/json", bytes.NewBuffer(body))
+	body := `{"body": "` + composeCommentText(analysisFindings) + `"}`
+	req, err := http.NewRequest("POST", commentsURL, strings.NewReader(body))
+	if err != nil {
+		log.Printf("%s - failed to create POST request", repoName)
+	}
+	token := os.Getenv("GH_AUTH_TOKEN")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "token "+token)
+	client := http.Client{}
+	res, err := client.Do(req)
 	if err != nil {
 		log.Printf("%s - received error when  POSTing comment: %s", repoName, err)
 		return
