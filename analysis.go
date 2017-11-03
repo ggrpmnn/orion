@@ -77,34 +77,33 @@ func analyzeCode(json *sj.Json) {
 		log.Printf("%s - no results returned from scan(s); PR seems clean", repoName)
 		log.Printf("%s - finishing overall code analysis", repoName)
 		return
-	} else {
-		commentsURL := json.Get("pull_request").Get("comments_url").MustString()
-		if commentsURL == "" {
-			log.Printf("%s - failed to retrieve comments URL from JSON message", repoName)
-			return
+	}
+	commentsURL := json.Get("pull_request").Get("comments_url").MustString()
+	if commentsURL == "" {
+		log.Printf("%s - failed to retrieve comments URL from JSON message", repoName)
+		return
+	}
+	body := `{"body": "` + composeCommentText(analysisFindings) + `"}`
+	req, err := http.NewRequest("POST", commentsURL, strings.NewReader(body))
+	if err != nil {
+		log.Printf("%s - failed to create POST request", repoName)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "token "+os.Getenv("GH_AUTH_TOKEN"))
+	client := http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		log.Printf("%s - received error when  POSTing comment: %s", repoName, err)
+		return
+	}
+	if res.StatusCode > 299 {
+		log.Printf("%s - received error status (%d) when POSTing comment", repoName, res.StatusCode)
+		if res != nil {
+			bytes, _ := ioutil.ReadAll(res.Body)
+			log.Printf("%s - response error: %s", repoName, bytes)
 		}
-		body := `{"body": "` + composeCommentText(analysisFindings) + `"}`
-		req, err := http.NewRequest("POST", commentsURL, strings.NewReader(body))
-		if err != nil {
-			log.Printf("%s - failed to create POST request", repoName)
-			return
-		}
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "token "+os.Getenv("GH_AUTH_TOKEN"))
-		client := http.Client{}
-		res, err := client.Do(req)
-		if err != nil {
-			log.Printf("%s - received error when  POSTing comment: %s", repoName, err)
-			return
-		}
-		if res.StatusCode > 299 {
-			log.Printf("%s - received error status (%d) when POSTing comment", repoName, res.StatusCode)
-			if res != nil {
-				bytes, _ := ioutil.ReadAll(res.Body)
-				log.Printf("%s - response error: %s", repoName, bytes)
-			}
-			return
-		}
+		return
 	}
 
 	log.Printf("%s - finishing overall code analysis", repoName)
