@@ -14,12 +14,22 @@ import (
 	sj "github.com/bitly/go-simplejson"
 )
 
+// GitHubToken is the auth token expected for the GitHub user account that acts as Orion
+var (
+	GitHubUser  = os.Getenv("GH_USERNAME")
+	GitHubToken = os.Getenv("GH_AUTH_TOKEN")
+)
+
 func init() {
 	var err error
 
 	err = exec.Command("/usr/bin/which", "git").Run()
 	if err != nil {
 		log.Fatal("error: git not installed or not added to PATH")
+	}
+
+	if GitHubUser == "" || GitHubToken == "" {
+		log.Fatal("error: GitHub credentials were not supplied to the application")
 	}
 }
 
@@ -46,7 +56,7 @@ func analyzeCode(json *sj.Json) {
 	os.Mkdir(workDir, 0700)
 	os.Chdir(workDir)
 	defer cleanup(workDir)
-	err = exec.Command("git", "clone", gitURL).Run()
+	err = exec.Command("git", "clone", addCredsToURL(gitURL)).Run()
 	if err != nil {
 		log.Printf("%s - failed to clone repository from target URL '%s': %s", repoName, gitURL, err)
 		return
@@ -89,7 +99,7 @@ func analyzeCode(json *sj.Json) {
 			return
 		}
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "token "+os.Getenv("GH_AUTH_TOKEN"))
+		req.Header.Set("Authorization", "token "+GitHubToken)
 		client := http.Client{}
 		res, err := client.Do(req)
 		if err != nil {
@@ -134,6 +144,12 @@ func getRepoLanguages(endpoint string) (map[string]int, error) {
 		return nil, err
 	}
 	return languages, nil
+}
+
+func addCredsToURL(url string) string {
+	pieces := strings.Split(url, "://")
+	pieces[1] = fmt.Sprintf("%s:%s@%s", GitHubUser, GitHubToken, pieces[1])
+	return strings.Join(pieces, "://")
 }
 
 // composeCommentText creates the content of a comment message
