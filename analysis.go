@@ -148,13 +148,17 @@ func getRepoLanguages(endpoint string) (map[string]int, error) {
 	return languages, nil
 }
 
+// addCredsToURL takes the GitHub URL and adds credentials to it so that it takes the
+// form `http(s)://username:password@github.com/...`; this is used to avoid an instance
+// where credentials are requested when attempting to clone a repo, which could cause
+// the git process to wait for user input and stall
 func addCredsToURL(url string) string {
 	pieces := strings.Split(url, "://")
 	pieces[1] = fmt.Sprintf("%s:%s@%s", GitHubUser, GitHubToken, pieces[1])
 	return strings.Join(pieces, "://")
 }
 
-// composeCommentText creates the content of a comment message
+// composeCommentText creates the content of a comment message using the findings from the analysis
 func composeCommentText(af map[string][]Finding) string {
 	body := "Hi, I'm Orion, a code-analysis application. When you registered your pull request, your code was scanned and the following issues were found.\\n\\n"
 	for language, findings := range af {
