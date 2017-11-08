@@ -14,9 +14,11 @@ import (
 	sj "github.com/bitly/go-simplejson"
 )
 
-// GitHubToken is the auth token expected for the GitHub user account that acts as Orion
 var (
-	GitHubUser  = os.Getenv("GH_USERNAME")
+	// GitHubUser is the GitHub account's username stored in the env
+	GitHubUser = os.Getenv("GH_USERNAME")
+
+	// GitHubToken is the GitHub account auth token stored in the env
 	GitHubToken = os.Getenv("GH_AUTH_TOKEN")
 )
 
