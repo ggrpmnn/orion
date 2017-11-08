@@ -53,13 +53,6 @@ func analyze(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check to see if we have permissions to view the PR/code
-	hasPerms := false
-	if !hasPerms && false { // TODO: remove the disabler
-		sendResponse(w, `{"error": "Orion does not have permissions to view the PR or Github repo"}`, http.StatusInternalServerError)
-		return
-	}
-
 	// begin analysis of repo code
 	sendResponse(w, `{"message": "received request to analyze code; beginning analysis - findings will be posted to a comment on the PR"}`, http.StatusOK)
 	analyzeCode(js)
