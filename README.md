@@ -10,7 +10,7 @@ This tool uses and expects several other tools to be installed in order to funct
 - gas ([Go code analysis tool](https://github.com/GoASTScanner/gas))
 
 ### Languages Currently Supported
-- Go (Golang) - in development
+- Go (Golang): baseline functional
 
 ### TODO List
 GitHub
