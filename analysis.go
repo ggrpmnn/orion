@@ -33,7 +33,7 @@ func init() {
 	}
 }
 
-// analyzeCode is is called when the API receives a webhook message to the /analyze
+// analyzeCode is called when the API receives a webhook message to the /analyze
 // endpoint; for actual analysis functionality, see language-specific functions in tools.go
 func analyzeCode(json *sj.Json) {
 	repoName := json.Get("repository").Get("name").MustString()

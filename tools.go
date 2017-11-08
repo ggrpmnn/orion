@@ -33,7 +33,6 @@ func analyzeGo(repoName string) ([]Finding, error) {
 	resBytes, _ := cmd.Output()
 	resStr := string(resBytes)
 
-	// parse results
 	findings := make([]Finding, 0)
 	// output line format/example: [/path/to/file:123] - Errors unhandled. (Confidence: HIGH, Severity: LOW)
 	rx := regexp.MustCompile(`\[([\S]+):(\d+)\] - (.*)`)
@@ -58,10 +57,12 @@ func analyzeGo(repoName string) ([]Finding, error) {
 	return findings, nil
 }
 
-func pathContains(s []string, lookup string) (bool, int) {
-	for i, v := range s {
-		if v == lookup {
-			return true, i
+// pathContains returns true if the given path contains the specified value, false otherwise
+// used to see if a path (split on the separator) contains a particular folder name
+func pathContains(path []string, lookup string) (bool, int) {
+	for idx, val := range path {
+		if val == lookup {
+			return true, idx
 		}
 	}
 	return false, -1
