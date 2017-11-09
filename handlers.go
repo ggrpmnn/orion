@@ -1,18 +1,28 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
+	"github.com/alecthomas/template"
 	sj "github.com/bitly/go-simplejson"
 )
+
+var templates *template.Template
+
+func init() {
+	templates = template.Must(template.ParseGlob("templates/*"))
+	log.Println("HTML templates parsed")
+}
 
 // index handles the requests to the main page
 func index(w http.ResponseWriter, r *http.Request) {
 	log.Printf("received homepage request from " + r.RemoteAddr)
-	fmt.Fprintln(w, "Orion Homepage")
+	//fmt.Fprintln(w, "Orion Homepage")
+	templates.ExecuteTemplate(w, "header", nil)
+	templates.ExecuteTemplate(w, "index", nil)
+	templates.ExecuteTemplate(w, "footer", nil)
 }
 
 // notFound handles any requests to unknown resources
