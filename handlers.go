@@ -12,7 +12,7 @@ import (
 var templates *template.Template
 
 func init() {
-	templates = template.Must(template.ParseGlob("templates/*"))
+	templates = template.Must(template.ParseGlob("html/*"))
 	log.Println("HTML templates parsed")
 }
 
