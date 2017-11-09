@@ -16,6 +16,10 @@ func main() {
 	router.HandleFunc("/analyze", analyze).Methods("POST")
 	router.NotFoundHandler = http.HandlerFunc(notFound)
 
+	// for serving static files (HTML, CSS, etc.)
+	router.Handle("/css/{file}", http.FileServer(http.Dir("")))
+	router.Handle("/img/{file}", http.FileServer(http.Dir("")))
+
 	log.Print("listening on port " + port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
