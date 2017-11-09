@@ -5,7 +5,19 @@ html {
 div.content {
     display: block;
     width: 70%;
-    margin: 0 15% 0 15%;
+    min-width: 500px;
+}
+
+@media (min-width: 750px) {
+    div.content {
+        margin: 0 15% 0 15%;
+    }
+}
+
+@media (max-width:749px) {
+    div.content {
+        margin: 0;
+    }
 }
 
 div.image-container {
