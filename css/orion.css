@@ -3,22 +3,38 @@ html {
 }
 
 div.content {
+    display: block;
     width: 70%;
     margin: 0 15% 0 15%;
 }
 
-div.image-header {
-    float: left;
-    clear: both;
-    margin: 2% 0 3% 0;
+div.image-container {
+    margin: 4% 0 3% 0;
 }
 
-div.image-header img.logo {
+div.image-container img.logo {
     width: 22%;
     height: auto;
 }
 
-div.image-header img.title {
+div.image-container img.title {
     width: 78%;
     height: auto;
+}
+
+div.text-container {
+    display: inline;
+    font-family: "Verdana", sans-serif;
+}
+
+div.text-container div.text-left {
+    display: inherit;
+    width: 50%;
+    float: left
+}
+
+div.text-container div.text-right {
+    display: inherit;
+    width: 50%;
+    float: right;
 }
