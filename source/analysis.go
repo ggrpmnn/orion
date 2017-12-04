@@ -30,15 +30,15 @@ func init() {
 // analyzeCode is called when the API receives a webhook message to the /analyze
 // endpoint; for actual analysis functionality, see language-specific functions in tools.go
 func analyzeCode(json *sj.Json) {
-	repoName := json.Get("repository").Get("name").MustString()
+	repoName := github.GetRepoName(json)
 	log.Printf("%s - beginning overall code analysis", repoName)
 
-	gitURL := json.Get("pull_request").Get("head").Get("repo").Get("clone_url").MustString()
+	gitURL := github.GetRepoURL(json)
 	if gitURL == "" {
 		log.Printf("%s - failed to retrieve git URL from JSON message", repoName)
 		return
 	}
-	// create SHA hash of message and use it as the name of the work directory
+	// create SHA hash of message and use it as the name of the temporary work directory
 	messageHash := sha256.New()
 	jsBytes, err := json.Encode()
 	if err != nil {
@@ -56,7 +56,7 @@ func analyzeCode(json *sj.Json) {
 		return
 	}
 
-	languages, err := github.GetLanguages(json.Get("repository").Get("languages_url").MustString())
+	languages, err := github.GetLanguageMapping(json)
 	if err != nil {
 		log.Printf("%s - failed to retrieve repository code composition: %s", repoName, err)
 		return
