@@ -13,7 +13,7 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", index)
-	router.HandleFunc("/analyze", analyze).Methods("POST")
+	router.HandleFunc("/analyze", analyzeHandler).Methods("POST")
 	router.NotFoundHandler = http.HandlerFunc(notFound)
 
 	// for serving static files (HTML, CSS, etc.)

@@ -31,9 +31,10 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 	sendResponse(w, `{"error": "requested resource does not exist"}`, http.StatusNotFound)
 }
 
-// analyze responds immediately and begins the code analysis
-// for the specified repo
-func analyze(w http.ResponseWriter, r *http.Request) {
+// analyzeHandler responds immediately and begins the code analysis
+// for the specified repo; this function specifically handles the request
+// data and prepares for running analysis
+func analyzeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("received analyis request from " + r.RemoteAddr)
 
 	// parse the request body and convert to JSON
