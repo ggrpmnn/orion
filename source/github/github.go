@@ -18,7 +18,7 @@ var (
 
 func init() {
 	if GitHubUser == "" || GitHubToken == "" {
-		log.Fatal("error: GitHub credentials were not supplied to the application")
+		log.Fatal("ERROR: GitHub credentials were not supplied to the application")
 	}
 }
 

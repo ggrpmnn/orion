@@ -14,10 +14,14 @@ import (
 	"github.com/ggrpmnn/orion/source/github"
 )
 
-func init() {
-	var err error
+var orionWorkspace = os.Getenv("ORION_WORKSPACE")
 
-	err = exec.Command("/usr/bin/which", "git").Run()
+func init() {
+	if orionWorkspace == "" {
+		orionWorkspace = "."
+	}
+
+	err := exec.Command("/usr/bin/which", "git").Run()
 	if err != nil {
 		log.Fatal("error: git not installed or not added to PATH")
 	}
@@ -42,7 +46,7 @@ func analyzeCode(json *sj.Json) {
 		return
 	}
 	messageHash.Write(jsBytes)
-	workDir := fmt.Sprintf("./%x", messageHash.Sum(nil))
+	workDir := fmt.Sprintf("%s/%x", orionWorkspace, messageHash.Sum(nil))
 	os.Mkdir(workDir, 0700)
 	os.Chdir(workDir)
 	defer cleanup(workDir)
@@ -97,9 +101,9 @@ func addGitHubCredsToURL(url string) string {
 }
 
 // composeCommentText creates the content of a comment message using the findings from the analysis
-func composeCommentText(af map[string][]Finding) string {
+func composeCommentText(findings map[string][]Finding) string {
 	body := "Hi, I'm Orion, a code-analysis application. When you registered your pull request, your code was scanned and the following issues were found.\\n\\n"
-	for language, findings := range af {
+	for language, findings := range findings {
 		body += fmt.Sprintf("%s:\\n", language)
 		for _, finding := range findings {
 			body += fmt.Sprintf("* `%s`, line %s: %s\\n", finding.File, finding.Line, finding.Text)
