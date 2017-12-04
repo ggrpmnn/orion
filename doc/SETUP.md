@@ -24,6 +24,8 @@ Your server needs (at minimum) internet access to GitHub IP ranges, which can be
 
 Once your server is configured, you'll need to download and build Orion. To do that, `git clone` this repo and run the command `go build -o orion <path-to-orion-project>/source/*.go` in the cloned directory. Then simply run Orion (`./orion`), and the application will be awaiting an incoming webhook message (see below)!
 
+To scan a repo, Orion will `git clone` that repo in order to operate on the files. It will, by default, clone those repos into its own working folder (`<path-to-orion-project>/source`). If you need to change where Orion downloads source code for any reason, you can do that by setting a path into your environment under `ORION-WORKSPACE`. The user/group for Orion will need to be able to access this folder as well, so double check the permissions on any workspace folders before running.
+
 ### GitHub Setup
 
 Orion also needs a few things setup in GitHub to work. You'll need:
