@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,14 +11,7 @@ import (
 	"strings"
 
 	sj "github.com/bitly/go-simplejson"
-)
-
-var (
-	// GitHubUser is the GitHub account's username stored in the env
-	GitHubUser = os.Getenv("GH_USERNAME")
-
-	// GitHubToken is the GitHub account auth token stored in the env
-	GitHubToken = os.Getenv("GH_AUTH_TOKEN")
+	"github.com/ggrpmnn/orion/source/github"
 )
 
 func init() {
@@ -28,10 +20,6 @@ func init() {
 	err = exec.Command("/usr/bin/which", "git").Run()
 	if err != nil {
 		log.Fatal("error: git not installed or not added to PATH")
-	}
-
-	if GitHubUser == "" || GitHubToken == "" {
-		log.Fatal("error: GitHub credentials were not supplied to the application")
 	}
 }
 
@@ -58,13 +46,13 @@ func analyzeCode(json *sj.Json) {
 	os.Mkdir(workDir, 0700)
 	os.Chdir(workDir)
 	defer cleanup(workDir)
-	err = exec.Command("git", "clone", addCredsToURL(gitURL)).Run()
+	err = exec.Command("git", "clone", addGitHubCredsToURL(gitURL)).Run()
 	if err != nil {
 		log.Printf("%s - failed to clone repository from target URL '%s': %s", repoName, gitURL, err)
 		return
 	}
 
-	languages, err := getRepoLanguages(json.Get("repository").Get("languages_url").MustString())
+	languages, err := github.GetLanguages(json.Get("repository").Get("languages_url").MustString())
 	if err != nil {
 		log.Printf("%s - failed to retrieve repository code composition: %s", repoName, err)
 		return
@@ -89,72 +77,22 @@ func analyzeCode(json *sj.Json) {
 	if len(analysisFindings) == 0 {
 		log.Printf("%s - no results returned from scan(s); PR seems clean", repoName)
 	} else {
-		commentsURL := json.Get("pull_request").Get("comments_url").MustString()
-		if commentsURL == "" {
-			log.Printf("%s - failed to retrieve comments URL from JSON message", repoName)
-			return
-		}
-		body := `{"body": "` + composeCommentText(analysisFindings) + `"}`
-		req, err := http.NewRequest("POST", commentsURL, strings.NewReader(body))
+		err = postComment(json, analysisFindings, repoName)
 		if err != nil {
-			log.Printf("%s - failed to create POST request", repoName)
-			return
-		}
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "token "+GitHubToken)
-		client := http.Client{}
-		res, err := client.Do(req)
-		if err != nil {
-			log.Printf("%s - received error when  POSTing comment: %s", repoName, err)
-			return
-		}
-		if res.StatusCode > 299 {
-			log.Printf("%s - received error status (%d) when POSTing comment", repoName, res.StatusCode)
-			if res != nil {
-				bytes, _ := ioutil.ReadAll(res.Body)
-				log.Printf("%s - response error: %s", repoName, bytes)
-			}
-			return
+			log.Printf(err.Error())
 		}
 	}
 
 	log.Printf("%s - finishing overall code analysis", repoName)
 }
 
-// cleanup removes new folders and cloned code when the analysis is done; this function preferably
-// should be 'defer'ed to ensure that it is run even when a panic/unexpected error occurs
-func cleanup(dir string) {
-	os.Chdir("../")
-	os.RemoveAll(dir)
-}
-
-// getRepoLanguages queries GitHub for the repository's language composition; see
-// https://developer.github.com/v3/repos/#list-languages for more information on the service
-func getRepoLanguages(endpoint string) (map[string]int, error) {
-	resp, err := http.Get(endpoint)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	languages := make(map[string]int)
-	err = json.Unmarshal(body, &languages)
-	if err != nil {
-		return nil, err
-	}
-	return languages, nil
-}
-
-// addCredsToURL takes the GitHub URL and adds credentials to it so that it takes the
-// form `http(s)://username:password@github.com/...`; this is used to avoid an instance
+// addGitHubCredsToURL takes the GitHub URL and adds credentials so that it takes the
+// form `http(s)://username:password@github.com/...`; this is used to avoid a state
 // where credentials are requested when attempting to clone a repo, which could cause
 // the git process to wait for user input and stall
-func addCredsToURL(url string) string {
+func addGitHubCredsToURL(url string) string {
 	pieces := strings.Split(url, "://")
-	pieces[1] = fmt.Sprintf("%s:%s@%s", GitHubUser, GitHubToken, pieces[1])
+	pieces[1] = fmt.Sprintf("%s:%s@%s", github.GitHubUser, github.GitHubToken, pieces[1])
 	return strings.Join(pieces, "://")
 }
 
@@ -171,4 +109,41 @@ func composeCommentText(af map[string][]Finding) string {
 	body += "Please fix these issues before merging this PR, if possible. Thanks!"
 
 	return body
+}
+
+// postComment gets the repo's comment URL from the message JSON, composes the comment body,
+// then posts the comment (with any findings) to the PR
+func postComment(json *sj.Json, findings map[string][]Finding, repoName string) error {
+	commentsURL := json.Get("pull_request").Get("comments_url").MustString()
+	if commentsURL == "" {
+		return fmt.Errorf("%s - failed to retrieve comments URL from JSON message", repoName)
+	}
+	body := `{"body": "` + composeCommentText(findings) + `"}`
+	req, err := http.NewRequest("POST", commentsURL, strings.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("%s - failed to create POST request", repoName)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "token "+github.GitHubToken)
+	client := http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("%s - received error when  POSTing comment: %s", repoName, err)
+	}
+	if res.StatusCode > 299 {
+		if res == nil {
+			err = fmt.Errorf("%s - received error status (%d) when POSTing comment", repoName, res.StatusCode)
+		} else {
+			bytes, _ := ioutil.ReadAll(res.Body)
+			return fmt.Errorf("%s - response error: %s", repoName, bytes)
+		}
+	}
+	return nil
+}
+
+// cleanup removes new folders and cloned code when the analysis is done; this function preferably
+// should be 'defer'ed to ensure that it is run even when a panic/unexpected error occurs
+func cleanup(dir string) {
+	os.Chdir("../")
+	os.RemoveAll(dir)
 }
