@@ -22,6 +22,8 @@ Orion is a hosted application that has several prerequisites. It expects a unix 
 
 Your server needs (at minimum) internet access to GitHub IP ranges, which can be found [on this page](https://help.github.com/articles/github-s-ip-addresses/). If you're deploying Orion for a GitHub enterprise solution, it will need to be deployed on a server with network access and with access to your GitHub enterprise IP ranges.
 
+Once your server is configured, you'll need to download and build Orion. To do that, `git clone` this repo and run the command `go build -o orion <path-to-orion-project>/source/*.go` in the cloned directory. Then simply run Orion (`./orion`), and the application will be awaiting an incoming webhook message (see below)!
+
 ### GitHub Setup
 
 Orion also needs a few things setup in GitHub to work. You'll need:
