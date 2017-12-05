@@ -11,15 +11,15 @@ import (
 )
 
 var (
-	// GitHubUser is the GitHub account's username stored in the env
-	GitHubUser = os.Getenv("GH_USERNAME")
+	// User is the GitHub account's username stored in the env
+	User = os.Getenv("GH_USERNAME")
 
-	// GitHubToken is the GitHub account auth token stored in the env
-	GitHubToken = os.Getenv("GH_AUTH_TOKEN")
+	// Token is the GitHub account auth token stored in the env
+	Token = os.Getenv("GH_AUTH_TOKEN")
 )
 
 func init() {
-	if GitHubUser == "" || GitHubToken == "" {
+	if User == "" || Token == "" {
 		log.Fatal("ERROR: GitHub credentials were not supplied to the application")
 	}
 }

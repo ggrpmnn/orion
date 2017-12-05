@@ -96,7 +96,7 @@ func analyzeCode(json *sj.Json) {
 // the git process to wait for user input and stall
 func addGitHubCredsToURL(url string) string {
 	pieces := strings.Split(url, "://")
-	pieces[1] = fmt.Sprintf("%s:%s@%s", github.GitHubUser, github.GitHubToken, pieces[1])
+	pieces[1] = fmt.Sprintf("%s:%s@%s", github.User, github.Token, pieces[1])
 	return strings.Join(pieces, "://")
 }
 
@@ -128,7 +128,7 @@ func postComment(json *sj.Json, findings map[string][]Finding, repoName string) 
 		return fmt.Errorf("%s - failed to create POST request", repoName)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "token "+github.GitHubToken)
+	req.Header.Set("Authorization", "token "+github.Token)
 	client := http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
