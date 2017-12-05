@@ -19,7 +19,6 @@ func init() {
 // index handles the requests to the main page
 func index(w http.ResponseWriter, r *http.Request) {
 	log.Printf("received homepage request from " + r.RemoteAddr)
-	//fmt.Fprintln(w, "Orion Homepage")
 	templates.ExecuteTemplate(w, "header", nil)
 	templates.ExecuteTemplate(w, "index", nil)
 	templates.ExecuteTemplate(w, "footer", nil)
@@ -37,7 +36,6 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 func analyzeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("received analyis request from " + r.RemoteAddr)
 
-	// parse the request body and convert to JSON
 	if r.Body == nil {
 		log.Printf("received nil request body")
 		sendResponse(w, `{"error": "received empty request body"}`, http.StatusBadRequest)
@@ -64,7 +62,6 @@ func analyzeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// begin analysis of repo code
 	sendResponse(w, `{"message": "received request to analyze code; beginning analysis - findings will be posted to a comment on the PR"}`, http.StatusOK)
 	analyzeCode(js)
 }
