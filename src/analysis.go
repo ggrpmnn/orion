@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	sj "github.com/bitly/go-simplejson"
-	"github.com/ggrpmnn/orion/source/github"
+	"github.com/ggrpmnn/orion/src/github"
 )
 
 var orionWorkspace = os.Getenv("ORION_WORKSPACE")

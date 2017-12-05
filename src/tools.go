@@ -19,9 +19,7 @@ type Finding struct {
 }
 
 func init() {
-	var err error
-
-	err = exec.Command("/usr/bin/which", "gas").Run()
+	err := exec.Command("/usr/bin/which", "gas").Run()
 	if err != nil {
 		log.Fatalf("gas (Go(lang) source tool) not installed; exiting")
 	}
