@@ -42,11 +42,7 @@ func analyzeGo(repoName string) ([]Finding, error) {
 			continue
 		}
 		filepath := matches[1]
-		pathSplit := strings.Split(filepath, "/")
-		ok, idx := pathContains(pathSplit, repoName)
-		if ok {
-			filepath = strings.Join(pathSplit[idx+1:], "/")
-		}
+
 		findings = append(findings, Finding{File: filepath, Line: matches[2], Text: matches[3]})
 	}
 	if err := scan.Err(); err != nil {
@@ -54,6 +50,18 @@ func analyzeGo(repoName string) ([]Finding, error) {
 	}
 
 	return findings, nil
+}
+
+// trimFileName looks in the full path for the delim string and then trims the filepath
+// accordingly; for example: calling trimFileName("/test/file/path", "file") will return
+// "file/path"
+func trimFileName(filepath string, delim string) string {
+	pathSplit := strings.Split(filepath, "/")
+	ok, idx := pathContains(pathSplit, delim)
+	if ok {
+		return strings.Join(pathSplit[idx+1:], "/")
+	}
+	return filepath
 }
 
 // pathContains returns true if the given path contains the specified value, false otherwise
