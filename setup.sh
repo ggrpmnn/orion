@@ -46,6 +46,7 @@ fi
 rm $go_file;
 
 # install ruby (and gems)
+# from http://ask.xmodulo.com/upgrade-ruby-centos.html
 ruby_file="ruby-2.4.0.tar.gz";
 wget "https://cache.ruby-lang.org/pub/ruby/$ruby_file" -q;
 tar -C /usr/local -xzf $ruby_file;
@@ -58,6 +59,7 @@ if [[ $ruby_result == "ruby"* ]]; then
     echo -e "\e[32mRuby version $ruby_version successfully installed.\e[0m";
     gem update --system;
     gem install bundler;
+    gem install dawnscanner;
 else
     echo -e "\e[31mRuby install failed; please try again manually.\e[0m";
 fi
