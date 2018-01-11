@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	sj "github.com/bitly/go-simplejson"
@@ -20,6 +21,7 @@ func init() {
 	if orionWorkspace == "" {
 		orionWorkspace = "."
 	}
+	orionWorkspace, _ = filepath.Abs(orionWorkspace)
 
 	err := exec.Command("/usr/bin/which", "git").Run()
 	if err != nil {
