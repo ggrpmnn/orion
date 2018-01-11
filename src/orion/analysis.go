@@ -38,6 +38,12 @@ func analyzeCode(json *sj.Json) {
 		log.Printf("%s - failed to retrieve git URL from JSON message", repoName)
 		return
 	}
+	patchURL := github.GetPatchURL(json)
+	if patchURL == "" {
+		log.Printf("%s - failed to retrieve git patch URL from JSON message", repoName)
+		return
+	}
+	
 	// create SHA hash of message and use it as the name of the temporary work directory
 	messageHash := sha256.New()
 	jsBytes, err := json.Encode()
@@ -46,15 +52,34 @@ func analyzeCode(json *sj.Json) {
 		return
 	}
 	messageHash.Write(jsBytes)
+
 	workDir := fmt.Sprintf("%s/%x", orionWorkspace, messageHash.Sum(nil))
 	os.Mkdir(workDir, 0700)
 	os.Chdir(workDir)
-	defer cleanup(workDir)
+	defer cleanup(orionWorkspace, workDir)
 	err = exec.Command("git", "clone", addGitHubCredsToURL(gitURL)).Run()
 	if err != nil {
 		log.Printf("%s - failed to clone repository from target URL '%s': %s", repoName, gitURL, err)
 		return
 	}
+	os.Chdir(repoName)
+	patch, err := exec.Command("curl", "-L", patchURL).Output()
+	if err != nil {
+		log.Printf("%s - failed to retrieve patch for PR diffs (from %s): %s", repoName, patchURL, err.Error())
+		return
+	} else {
+		err = ioutil.WriteFile("./patch", patch, 0700)
+   		if err != nil {
+				fmt.Println("%s - failed to write patch data to file", repoName)
+				return
+		   }
+	}
+	err = exec.Command("git", "apply", "patch").Run()
+	if err != nil {
+		log.Printf("%s - failed to apply diff patch to repo code: %s", err.Error())
+		return
+	}
+
 
 	languages, err := github.GetLanguageMapping(json)
 	if err != nil {
@@ -147,7 +172,7 @@ func postComment(json *sj.Json, findings map[string][]Finding, repoName string) 
 
 // cleanup removes new folders and cloned code when the analysis is done; this function preferably
 // should be 'defer'ed to ensure that it is run even when a panic/unexpected error occurs
-func cleanup(dir string) {
-	os.Chdir("../")
+func cleanup(base, dir string) {
+	os.Chdir(base)
 	os.RemoveAll(dir)
 }

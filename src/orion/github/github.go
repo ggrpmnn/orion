@@ -35,6 +35,13 @@ func GetRepoURL(js *simplejson.Json) string {
 	return js.Get("pull_request").Get("head").Get("repo").Get("clone_url").MustString()
 }
 
+// GetPatchURL returns the base URL for the PR patch file (the patch file contains
+// the diff data between the base code and the code being PRed); the patch needs to
+// be applied with `git apply <patch_file>` in order to see the updated code
+func GetPatchURL(js *simplejson.Json) string {
+	return js.Get("pull_request").Get("patch_url").MustString()
+}
+
 // GetLanguageMapping queries GitHub for the repository's language composition, and returns
 // a map of languages (strings) to their weight in lines of code (int); see
 // https://developer.github.com/v3/repos/#list-languages for more information on the service
