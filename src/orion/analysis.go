@@ -127,7 +127,7 @@ func addGitHubCredsToURL(url string) string {
 }
 
 // composeCommentText creates the content of a comment message using the findings from the analysis
-func composeCommentText(findings map[string][]Finding) string {
+func composeCommentText(findings map[string][]Finding, repoName string) string {
 	body := "Hi, I'm Orion, a code-analysis application. When you registered your pull request, your code was scanned and the following issues were found.\\n\\n"
 	for language, findings := range findings {
 		body += fmt.Sprintf("%s:\\n", language)
@@ -150,7 +150,7 @@ func postComment(json *sj.Json, findings map[string][]Finding, repoName string) 
 	if commentsURL == "" {
 		return fmt.Errorf("%s - failed to retrieve comments URL from JSON message", repoName)
 	}
-	body := `{"body": "` + composeCommentText(findings) + `"}`
+	body := `{"body": "` + composeCommentText(findings, repoName) + `"}`
 	req, err := http.NewRequest("POST", commentsURL, strings.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("%s - failed to create POST request", repoName)
