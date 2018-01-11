@@ -16,6 +16,6 @@ RUN yum install gcc git make sqlite-devel which golang ruby ruby-devel -y -q -e 
 
 RUN cd /root/go/src/github.com/ggrpmnn && git clone https://github.com/ggrpmnn/orion
 RUN go get -u github.com/ggrpmnn/orion/src/orion github.com/GoASTScanner/gas
-RUN go install github.com/ggrpmnn/orion/src/orion
+RUN cd /root/go/src/github.com/GoASTScanner/gas/cmd/gas && go get ./... && go install
 RUN gem install bundler 
 #dawnscanner
