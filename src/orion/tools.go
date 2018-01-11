@@ -28,7 +28,7 @@ func init() {
 // analyzeGo utilizes the GoAST package to analyze Go(lang) code and returns
 // an array of Finding structs containing any results produced by the tool
 func analyzeGo(repoName string) ([]Finding, error) {
-	cmd := exec.Command("gas", "-skip=tests*", "./...")
+	cmd := exec.Command("gas", "./...")
 	resBytes, _ := cmd.Output()
 	resStr := string(resBytes)
 
