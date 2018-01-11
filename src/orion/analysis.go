@@ -82,7 +82,6 @@ func analyzeCode(json *sj.Json) {
 		return
 	}
 
-
 	languages, err := github.GetLanguageMapping(json)
 	if err != nil {
 		log.Printf("%s - failed to retrieve repository code composition: %s", repoName, err)
