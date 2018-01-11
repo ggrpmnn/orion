@@ -132,7 +132,9 @@ func composeCommentText(findings map[string][]Finding) string {
 	for language, findings := range findings {
 		body += fmt.Sprintf("%s:\\n", language)
 		for _, finding := range findings {
-			body += fmt.Sprintf("* `%s`, line %s: %s\\n", finding.File, finding.Line, finding.Text)
+			fileName := strings.Split(finding.File, repoName)
+			fileRel := strings.TrimLeft(fileName[1], "/")
+			body += fmt.Sprintf("* `%s`, line %s: %s\\n", fileRel, finding.Line, finding.Text)
 		}
 		body += "\\n\\n"
 	}
